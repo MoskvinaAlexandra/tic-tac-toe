@@ -4,10 +4,22 @@ const EMPTY = ' ';
 
 const container = document.getElementById('fieldWrapper');
 
+let board = [];
+let currentPlayer = CROSS;
+let gameActive = true;
+
 startGame();
 addResetListener();
 
-function startGame () {
+function startGame() {
+    // Инициализация поля 3x3
+    board = [
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY]
+    ];
+    currentPlayer = CROSS;
+    gameActive = true;
     renderGrid(3);
 }
 
@@ -26,14 +38,36 @@ function renderGrid (dimension) {
     }
 }
 
-function cellClickHandler (row, col) {
-    // Пиши код тут
-    console.log(`Clicked on cell: ${row}, ${col}`);
+function cellClickHandler(row, col) {
+    if (!gameActive) return;
+    if (board[row][col] !== EMPTY) return;
+    board[row][col] = currentPlayer;
+    renderSymbolInCell(currentPlayer, row, col);
 
+    if (checkWin(currentPlayer)) { //написать checkWin
+        gameActive = false;
+        alert(`Победитель: ${currentPlayer}`);
+        return;
+    }
+    
+    if (isBoardFull()) {
+        gameActive = false;
+        alert('Победила дружба');
+        return;
+    }
+    
+    currentPlayer = currentPlayer === CROSS ? ZERO : CROSS;
+}
 
-    /* Пользоваться методом для размещения символа в клетке так:
-        renderSymbolInCell(ZERO, row, col);
-     */
+function isBoardFull() {
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (board[i][j] === EMPTY) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
