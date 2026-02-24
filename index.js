@@ -12,7 +12,6 @@ startGame();
 addResetListener();
 
 function startGame() {
-    // Инициализация поля 3x3
     board = [
         [EMPTY, EMPTY, EMPTY],
         [EMPTY, EMPTY, EMPTY],
@@ -41,11 +40,14 @@ function renderGrid (dimension) {
 function cellClickHandler(row, col) {
     if (!gameActive) return;
     if (board[row][col] !== EMPTY) return;
+    
     board[row][col] = currentPlayer;
     renderSymbolInCell(currentPlayer, row, col);
-
-    if (checkWin(currentPlayer)) { //написать checkWin
+    
+    const winInfo = checkWin(currentPlayer);
+    if (winInfo.isWin) {
         gameActive = false;
+        highlightWinningCells(winInfo.cells);
         alert(`Победитель: ${currentPlayer}`);
         return;
     }
@@ -57,6 +59,43 @@ function cellClickHandler(row, col) {
     }
     
     currentPlayer = currentPlayer === CROSS ? ZERO : CROSS;
+    console.log('Теперь ходит:', currentPlayer);
+}
+
+function checkWin(player) {
+    for (let i = 0; i < 3; i++) {
+        if (board[i][0] === player && board[i][1] === player && board[i][2] === player) {
+            return {
+                isWin: true,
+                cells: [[i, 0], [i, 1], [i, 2]]
+            };
+        }
+        if (board[0][i] === player && board[1][i] === player && board[2][i] === player) {
+            return {
+                isWin: true,
+                cells: [[0, i], [1, i], [2, i]]
+            };
+        }
+    }
+    if (board[0][0] === player && board[1][1] === player && board[2][2] === player) {
+        return {
+            isWin: true,
+            cells: [[0, 0], [1, 1], [2, 2]]
+        };
+    }
+    if (board[0][2] === player && board[1][1] === player && board[2][0] === player) {
+        return {
+            isWin: true,
+            cells: [[0, 2], [1, 1], [2, 0]]
+        };
+    }
+    return { isWin: false };
+}
+
+function highlightWinningCells(cells) {
+    cells.forEach(([row, col]) => {
+        renderSymbolInCell(board[row][col], row, col, 'red');
+    });
 }
 
 function isBoardFull() {
@@ -72,7 +111,6 @@ function isBoardFull() {
 
 function renderSymbolInCell (symbol, row, col, color = '#333') {
     const targetCell = findCell(row, col);
-
     targetCell.textContent = symbol;
     targetCell.style.color = color;
 }
@@ -89,11 +127,9 @@ function addResetListener () {
 
 function resetClickHandler () {
     console.log('reset!');
+    startGame();
 }
 
-
-/* Test Function */
-/* Победа первого игрока */
 function testWin () {
     clickOnCell(0, 2);
     clickOnCell(0, 0);
@@ -104,7 +140,6 @@ function testWin () {
     clickOnCell(2, 1);
 }
 
-/* Ничья */
 function testDraw () {
     clickOnCell(2, 0);
     clickOnCell(1, 0);
